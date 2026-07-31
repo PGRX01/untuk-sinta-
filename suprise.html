@@ -1,0 +1,1012 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; media-src 'self'; connect-src 'self'; base-uri 'self'; form-action 'none'; object-src 'none';">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<title>Happy Birthday Adventure! 🎀</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Quicksand:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<script>
+  // Proteksi dasar dari clickjacking
+  if (window.top !== window.self) { window.top.location = window.self.location; }
+</script>
+
+<style>
+  /* ==========================================================
+     0) DESIGN TOKENS
+     Palet warna & tipografi sesuai brief: pastel pink, lavender,
+     putih, kuning pastel, mint. Warna "-deep" adalah turunan yang
+     aku tambahkan khusus untuk kontras teks/tombol yang cukup
+     terbaca di atas warna pastelnya sendiri.
+  ========================================================== */
+  :root{
+    --pink:        #FFD6E8;
+    --pink-deep:   #FF6FB0;
+    --lavender:    #E9D5FF;
+    --lavender-deep: #B47EE8;
+    --white:       #FFFFFF;
+    --yellow:      #FFF3B0;
+    --yellow-deep: #F2C230;
+    --mint:        #D8F3DC;
+    --mint-deep:   #57B37E;
+    --text-dark:   #6B4664;
+    --text-soft:   #9B7B95;
+    --shadow-soft: 0 10px 30px rgba(180,110,160,0.18);
+    --radius-lg: 28px;
+    --radius-md: 20px;
+    --radius-sm: 14px;
+  }
+
+  *{ box-sizing: border-box; margin:0; padding:0; }
+  html{ scroll-behavior:smooth; }
+  body{
+    font-family:'Quicksand', sans-serif;
+    color: var(--text-dark);
+    background: linear-gradient(160deg, var(--pink) 0%, var(--lavender) 55%, var(--mint) 100%);
+    background-image: url('images/bg-utama.png');
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+    min-height:100vh;
+    overflow-x:hidden;
+    position:relative;
+  }
+  h1,h2,h3{ font-family:'Baloo 2', cursive; }
+  button{ font-family:'Quicksand', sans-serif; cursor:pointer; border:none; }
+
+  /* Cursor kustom disembunyikan hanya untuk perangkat dgn mouse asli,
+     supaya tidak mengganggu pengalaman sentuh di HP */
+  @media (hover:hover) and (pointer:fine){
+    body{ cursor:none; }
+    a, button{ cursor:none; }
+  }
+
+  /* ==========================================================
+     1) CURSOR KUSTOM & JEJAK SPARKLE
+  ========================================================== */
+  #customCursor{
+    position:fixed; top:0; left:0; width:26px; z-index:9999;
+    pointer-events:none; transform:translate(-50%,-50%);
+    transition: transform .05s linear; display:none;
+  }
+  @media (hover:hover) and (pointer:fine){ #customCursor{ display:block; } }
+  .sparkle{
+    position:fixed; pointer-events:none; z-index:9998; width:16px;
+    animation: sparkleFade 0.9s ease-out forwards;
+  }
+  @keyframes sparkleFade{
+    0%{ opacity:1; transform:translate(-50%,-50%) scale(1) rotate(0deg); }
+    100%{ opacity:0; transform:translate(-50%,-50%) translateY(-24px) scale(.4) rotate(90deg); }
+  }
+
+  /* ==========================================================
+     2) EASTER EGG — KARAKTER POJOK
+  ========================================================== */
+  .easter-egg{
+    position:fixed; bottom:16px; left:16px; z-index:500;
+    font-size:30px; background:var(--white); width:56px; height:56px;
+    border-radius:50%; display:flex; align-items:center; justify-content:center;
+    box-shadow: var(--shadow-soft); animation: eggBob 2.4s ease-in-out infinite;
+  }
+  @keyframes eggBob{ 0%,100%{ transform:translateY(0);} 50%{ transform:translateY(-6px);} }
+  .easter-egg-bubble{
+    position:fixed; bottom:80px; left:16px; z-index:500; max-width:200px;
+    background:var(--white); border-radius:16px; padding:10px 14px; font-size:13px;
+    box-shadow: var(--shadow-soft); opacity:0; transform:translateY(6px) scale(.9);
+    transition: opacity .25s ease, transform .25s ease; pointer-events:none;
+  }
+  .easter-egg-bubble.show{ opacity:1; transform:translateY(0) scale(1); }
+
+  /* ==========================================================
+     3) SCREEN MANAGER
+     Setiap "layar" (welcome, menu, dst) adalah section dengan
+     class .screen — hanya yang .active yang ditampilkan.
+  ========================================================== */
+  .screen{
+    display:none; min-height:100vh; width:100%;
+    flex-direction:column; align-items:center; justify-content:center;
+    padding:32px 20px; position:relative; text-align:center;
+  }
+  .screen.active{ display:flex; animation: screenIn .5s ease; }
+  @keyframes screenIn{ 0%{ opacity:0; transform:translateY(14px);} 100%{ opacity:1; transform:translateY(0);} }
+
+  .btn-back{
+    position:absolute; top:20px; left:20px; background:var(--white);
+    color:var(--text-dark); padding:10px 18px; border-radius:30px;
+    font-weight:600; box-shadow:var(--shadow-soft); z-index:10;
+  }
+
+  /* ==========================================================
+     3b) NAV BAR PERSISTEN (Home/Pesan/Galeri/Game/Musik/Kejutan)
+     Muncul di semua layar setelah gerbang welcome & reveal dilewati,
+     supaya bisa lompat cepat antar bagian tanpa harus "Kembali" dulu.
+  ========================================================== */
+  .app-nav{
+    position:fixed; top:0; left:0; right:0; z-index:800;
+    display:none; justify-content:center; gap:4px; flex-wrap:wrap;
+    background:rgba(255,255,255,.9); backdrop-filter:blur(8px);
+    padding:10px 12px; box-shadow:0 4px 16px rgba(180,110,160,.12);
+  }
+  .app-nav.show{ display:flex; }
+  .app-nav button{
+    background:none; display:flex; flex-direction:column; align-items:center;
+    gap:2px; padding:6px 10px; border-radius:12px; font-size:10px; font-weight:700;
+    color:var(--text-soft); transition: background .2s ease, color .2s ease;
+  }
+  .app-nav button span{ font-size:17px; }
+  .app-nav button img{ width:22px; height:22px; object-fit:contain; }
+  .app-nav button.active, .app-nav button:hover{ background:var(--pink); color:var(--pink-deep); }
+  body.app-started .screen{ padding-top:76px; }
+  @media(max-width:480px){ .app-nav button{ padding:5px 7px; } .app-nav button span{ font-size:15px; } .app-nav button img{ width:18px; height:18px; } }
+
+  /* Dekorasi bunting kecil di atas judul menu */
+  .bunting{ display:flex; justify-content:center; gap:6px; margin-bottom:6px; font-size:16px; }
+
+  /* ==========================================================
+     14) SCREEN: KEJUTAN (surprise/finale)
+  ========================================================== */
+  .kejutan-card{ max-width:380px; }
+  .kejutan-title{
+    font-size:32px; color:var(--pink-deep); margin-bottom:8px;
+    text-shadow: 0 0 20px rgba(255,111,176,.35);
+  }
+  .kejutan-sub{ color:var(--text-soft); margin-bottom:20px; }
+  .kejutan-bubble{
+    background:var(--white); border-radius:var(--radius-md); padding:18px 20px;
+    box-shadow:var(--shadow-soft); font-weight:600; margin-bottom:18px; text-align:left;
+  }
+  .kejutan-signoff{ font-style:italic; color:var(--pink-deep); font-weight:700; }
+
+  /* ==========================================================
+     4) SCREEN: WELCOME
+  ========================================================== */
+  .welcome-card{
+    background:var(--white); border-radius:var(--radius-lg); padding:40px 32px;
+    max-width:420px; width:100%; box-shadow:var(--shadow-soft); position:relative;
+  }
+  .welcome-card h1{ font-size:30px; color:var(--pink-deep); margin-bottom:14px; }
+  .welcome-card > p{ margin-bottom:10px; color:var(--text-soft); }
+  .welcome-list{ list-style:none; text-align:left; max-width:240px; margin:14px auto; }
+  .welcome-list li{ margin-bottom:6px; font-weight:600; }
+  .welcome-buttons{
+    position:relative; display:flex; gap:16px; justify-content:center;
+    margin-top:22px; min-height:120px; align-items:flex-start; flex-wrap:wrap;
+  }
+  .btn-ya{
+    background: linear-gradient(135deg, var(--pink-deep), #ff8fc6);
+    color:#fff; padding:14px 26px; border-radius:30px; font-weight:700; font-size:16px;
+    box-shadow: 0 10px 24px rgba(255,111,176,.45);
+    transition: transform .2s cubic-bezier(.34,1.56,.64,1);
+  }
+  .btn-ya:hover{ transform: translateY(-3px) scale(1.04); }
+  .btn-belum{
+    background: var(--lavender); color:var(--text-dark); padding:14px 22px;
+    border-radius:30px; font-weight:600; font-size:15px;
+    position:relative; transition: left .25s ease, top .25s ease;
+  }
+  .belum-taunt{
+    margin-top:16px; color:var(--pink-deep); font-weight:700; min-height:20px;
+    animation: popIn .3s ease;
+  }
+  @keyframes popIn{ 0%{ transform:scale(.7); opacity:0;} 100%{ transform:scale(1); opacity:1;} }
+
+  /* ==========================================================
+     5) SCREEN: REVEAL (loading + kue)
+  ========================================================== */
+  .reveal-wrap{ max-width:380px; }
+  .reveal-face{ font-size:30px; margin-bottom:14px; }
+  #loadingText{ font-weight:600; margin-bottom:10px; }
+  .loading-stars{ font-size:20px; letter-spacing:4px; animation: starPulse 1.2s ease-in-out infinite; margin-bottom:24px; }
+  @keyframes starPulse{ 0%,100%{ opacity:.4;} 50%{ opacity:1;} }
+  .cake-btn{
+    background:none; font-size:70px; animation: cakeGrow .6s cubic-bezier(.34,1.56,.64,1), cakeFloat 2s ease-in-out infinite .6s;
+    filter: drop-shadow(0 10px 16px rgba(255,111,176,.35));
+  }
+  @keyframes cakeGrow{ 0%{ transform:scale(0);} 100%{ transform:scale(1);} }
+  @keyframes cakeFloat{ 0%,100%{ transform:translateY(0);} 50%{ transform:translateY(-10px);} }
+  .cake-btn.popped{ animation: cakePop .5s ease forwards; }
+  @keyframes cakePop{ 0%{ transform:scale(1);} 50%{ transform:scale(1.4) rotate(10deg); opacity:1;} 100%{ transform:scale(0) rotate(20deg); opacity:0;} }
+  .reveal-burst-text{
+    font-family:'Baloo 2',cursive; font-size:34px; color:var(--pink-deep);
+    text-shadow: 0 0 20px rgba(255,111,176,.5); opacity:0; margin-top:10px;
+  }
+  .reveal-burst-text.show{ animation: burstTextIn .7s cubic-bezier(.34,1.56,.64,1) forwards; }
+  @keyframes burstTextIn{ 0%{ opacity:0; transform:scale(.4) rotate(-6deg);} 60%{ opacity:1; transform:scale(1.1) rotate(2deg);} 100%{ opacity:1; transform:scale(1) rotate(0);} }
+  .btn-lanjut{
+    margin-top:24px; background:var(--pink-deep); color:#fff; padding:12px 26px;
+    border-radius:30px; font-weight:700; opacity:0; pointer-events:none; transition:opacity .3s ease;
+  }
+  .btn-lanjut.show{ opacity:1; pointer-events:auto; }
+
+  /* ==========================================================
+     6) SCREEN: MENU UTAMA
+  ========================================================== */
+  .app-header{ font-size:26px; color:var(--lavender-deep); margin-bottom:24px; }
+  .menu-grid{
+    display:grid; grid-template-columns:repeat(3,1fr); gap:16px; max-width:480px; width:100%;
+  }
+  .menu-item{
+    background:var(--white); border-radius:var(--radius-md); padding:22px 10px;
+    display:flex; flex-direction:column; align-items:center; gap:8px;
+    box-shadow:var(--shadow-soft); font-weight:700; font-size:13px; color:var(--text-dark);
+    transition: transform .2s cubic-bezier(.34,1.56,.64,1);
+  }
+  .menu-item span{ font-size:26px; }
+  .menu-item:hover{ transform: translateY(-5px) scale(1.03); }
+  .menu-item:nth-child(4), .menu-item:nth-child(5){ grid-column: span 1; }
+  @media(max-width:420px){ .menu-grid{ grid-template-columns:repeat(2,1fr); } }
+  .app-footer{ margin-top:32px; font-size:13px; color:var(--text-soft); }
+
+  /* ==========================================================
+     7) SCREEN: PESAN SPESIAL
+  ========================================================== */
+  .pesan-card{
+    background:var(--white); border-radius:var(--radius-lg); padding:36px 30px;
+    max-width:420px; width:100%; box-shadow:var(--shadow-soft);
+  }
+  .pesan-text{ min-height:160px; font-size:16px; line-height:1.7; white-space:pre-line; display:flex; align-items:center; justify-content:center; }
+  .pesan-nav{ display:flex; justify-content:space-between; align-items:center; margin-top:20px; }
+  .pesan-nav button{ background:var(--lavender); padding:10px 16px; border-radius:20px; font-weight:600; font-size:13px; }
+  .pesan-nav button:disabled{ opacity:.4; }
+  .pesan-dots{ display:flex; justify-content:center; gap:6px; margin-top:14px; }
+  .pesan-dots span{ width:7px; height:7px; border-radius:50%; background:var(--lavender); }
+  .pesan-dots span.active{ background:var(--pink-deep); }
+
+  /* ==========================================================
+     8) SCREEN: GALERI KENANGAN
+  ========================================================== */
+  .galeri-line{
+    display:flex; gap:20px; overflow-x:auto; padding:30px 20px; max-width:100%;
+  }
+  .polaroid{
+    flex:0 0 auto; width:150px; background:var(--white); border-radius:10px;
+    padding:10px 10px 30px; box-shadow:var(--shadow-soft); cursor:pointer;
+    transform:rotate(var(--tilt)); transition: transform .5s; perspective:600px;
+  }
+  .polaroid-inner{ position:relative; width:100%; height:170px; transition: transform .5s; transform-style:preserve-3d; }
+  .polaroid.flipped .polaroid-inner{ transform: rotateY(180deg); }
+  .polaroid-front, .polaroid-back{
+    position:absolute; inset:0; backface-visibility:hidden; border-radius:6px;
+    display:flex; align-items:center; justify-content:center; text-align:center; padding:8px;
+    font-size:13px; font-weight:600; color:#fff;
+  }
+  .polaroid-back{ transform: rotateY(180deg); background:var(--pink-deep) !important; }
+  .galeri-hint{ margin-top:6px; color:var(--text-soft); font-size:13px; }
+
+  /* ==========================================================
+     9) SCREEN: MINI GAME
+  ========================================================== */
+  .game-hud{ display:flex; gap:20px; align-items:center; font-weight:700; margin-bottom:14px; }
+  .game-area{
+    position:relative; width:100%; max-width:420px; height:320px; background:var(--white);
+    border-radius:var(--radius-md); box-shadow:var(--shadow-soft); overflow:hidden;
+  }
+  .treat{
+    position:absolute; font-size:32px; background:none; animation: treatPop .3s ease;
+  }
+  @keyframes treatPop{ 0%{ transform:scale(0);} 100%{ transform:scale(1);} }
+  .game-start-btn, .game-retry-btn{
+    margin-top:18px; background:var(--pink-deep); color:#fff; padding:12px 26px;
+    border-radius:30px; font-weight:700;
+  }
+  .game-result{ margin-top:14px; font-family:'Baloo 2',cursive; font-size:20px; color:var(--mint-deep); min-height:28px; }
+
+  /* ==========================================================
+     10) SCREEN: KOTAK MISTERIUS
+  ========================================================== */
+  .kotak-btn{
+    background:none; font-size:110px; margin:20px 0; animation: kotakWobble 2s ease-in-out infinite;
+    filter: drop-shadow(0 12px 18px rgba(180,110,160,.3));
+  }
+  @keyframes kotakWobble{ 0%,100%{ transform:rotate(-3deg);} 50%{ transform:rotate(3deg);} }
+  .kotak-btn.shake{ animation: kotakShake .4s ease; }
+  @keyframes kotakShake{ 0%,100%{ transform:translateX(0);} 25%{ transform:translateX(-10px);} 75%{ transform:translateX(10px);} }
+  .kotak-btn.opened{ animation: kotakOpen .5s ease forwards; }
+  @keyframes kotakOpen{ 0%{ transform:scale(1);} 50%{ transform:scale(1.3);} 100%{ transform:scale(0); opacity:0;} }
+  .kotak-text{ font-weight:700; font-size:16px; min-height:24px; color:var(--pink-deep); max-width:340px; }
+
+  /* ==========================================================
+     11) SCREEN: MUSIK
+  ========================================================== */
+  .music-player{
+    background:var(--white); border-radius:var(--radius-lg); padding:30px 28px;
+    max-width:360px; width:100%; box-shadow:var(--shadow-soft);
+  }
+  .music-cover{
+    width:110px; height:110px; border-radius:50%; margin:0 auto 16px;
+    background: conic-gradient(var(--pink), var(--lavender), var(--mint), var(--pink));
+    display:flex; align-items:center; justify-content:center; font-size:36px;
+    animation: coverSpin 6s linear infinite paused;
+  }
+  .music-cover.playing{ animation-play-state: running; }
+  @keyframes coverSpin{ to{ transform:rotate(360deg);} }
+  .music-title{ font-weight:700; }
+  .music-artist{ color:var(--text-soft); font-size:13px; margin-bottom:14px; }
+  .music-progress{ background:var(--pink); border-radius:10px; height:6px; cursor:pointer; margin-bottom:6px; }
+  .music-progress-fill{ background:var(--pink-deep); height:100%; border-radius:10px; width:0%; }
+  .music-time{ display:flex; justify-content:space-between; font-size:11px; color:var(--text-soft); margin-bottom:16px; }
+  .music-controls{ display:flex; justify-content:center; align-items:center; gap:18px; margin-bottom:20px; }
+  .music-controls button{ background:none; font-size:18px; color:var(--text-dark); }
+  .music-play-btn{
+    width:52px; height:52px; border-radius:50%; background:var(--pink-deep) !important;
+    color:#fff !important; font-size:20px !important; display:flex; align-items:center; justify-content:center;
+  }
+  .music-modes{ display:flex; flex-wrap:wrap; gap:8px; justify-content:center; }
+  .music-modes button{
+    background:var(--lavender); padding:8px 12px; border-radius:16px; font-size:12px; font-weight:600;
+  }
+  .music-toast{
+    position:fixed; bottom:24px; left:50%; transform:translateX(-50%) translateY(20px);
+    background:var(--text-dark); color:#fff; padding:10px 20px; border-radius:20px;
+    font-size:13px; opacity:0; transition: all .3s ease; z-index:600; pointer-events:none;
+  }
+  .music-toast.show{ opacity:1; transform:translateX(-50%) translateY(0); }
+
+  /* ==========================================================
+     12) MODAL: EXIT INTENT
+  ========================================================== */
+  .exit-modal{
+    position:fixed; inset:0; background:rgba(107,70,100,.55); z-index:2000;
+    display:none; align-items:center; justify-content:center; padding:20px;
+  }
+  .exit-modal.show{ display:flex; }
+  .exit-modal-card{
+    background:var(--white); border-radius:var(--radius-lg); padding:32px 28px;
+    max-width:320px; text-align:center; box-shadow:var(--shadow-soft);
+    animation: cardFloatIn .4s cubic-bezier(.34,1.56,.64,1);
+  }
+  @keyframes cardFloatIn{ 0%{ opacity:0; transform:scale(.85);} 100%{ opacity:1; transform:scale(1);} }
+  .exit-modal-card p{ margin-bottom:6px; }
+  .exit-modal-buttons{ display:flex; flex-direction:column; gap:10px; margin-top:16px; }
+  .exit-stay{ background:var(--pink-deep); color:#fff; padding:12px; border-radius:20px; font-weight:700; }
+  .exit-leave{ background:var(--lavender); padding:12px; border-radius:20px; font-weight:600; }
+
+  /* ==========================================================
+     13) CONFETTI / BURST PARTICLES (dipakai ulang di beberapa momen)
+  ========================================================== */
+  .confetti-layer{ position:fixed; inset:0; z-index:1500; pointer-events:none; overflow:hidden; }
+  .confetti-piece{
+    position:absolute; top:0; left:0; will-change:transform,opacity;
+    animation: confettiFall linear forwards;
+  }
+  @keyframes confettiFall{
+    0%{ transform: translate(-50%,-50%) translate(0,0) rotate(0deg); opacity:1; }
+    100%{ transform: translate(-50%,-50%) translate(var(--dx), var(--dy)) rotate(var(--rot)); opacity:0; }
+  }
+
+  @media(max-width:480px){
+    .welcome-card, .pesan-card, .music-player{ padding:28px 22px; }
+    .welcome-card h1{ font-size:26px; }
+  }
+
+  /* ==========================================================
+     15) DEKORASI GAMBAR ASLI (dari aset yang kamu upload)
+  ========================================================== */
+  .deco-balon{
+    position:absolute; width:90px; bottom:-30px; left:-24px; z-index:1;
+    animation: decoFloat 4s ease-in-out infinite; pointer-events:none;
+  }
+  .deco-kado{
+    position:absolute; width:80px; top:-26px; right:-18px; z-index:1;
+    animation: decoFloat 4.5s ease-in-out infinite .5s; pointer-events:none;
+  }
+  @keyframes decoFloat{ 0%,100%{ transform:translateY(0) rotate(-3deg);} 50%{ transform:translateY(-12px) rotate(3deg);} }
+  .bunting-img{ width:100%; max-width:360px; margin-bottom:4px; }
+  .deco-boba{
+    position:fixed; width:60px; bottom:90px; right:14px; z-index:400;
+    animation: decoFloat 5s ease-in-out infinite; pointer-events:none; opacity:.9;
+  }
+  .polaroid-front img{
+    position:absolute; inset:0; width:100%; height:100%; object-fit:fill;
+  }
+  .polaroid-caption{
+    position:absolute; top:58%; left:0; right:0; text-align:center;
+    font-size:11.5px; font-weight:700; color:var(--text-dark); padding:0 10px;
+  }
+</style>
+</head>
+<body>
+
+<div id="customCursor"><img src="images/cursor-star.png" alt="" style="width:100%;display:block;"></div>
+<div id="easterEgg" class="easter-egg">ʕ•ᴥ•ʔ</div>
+<div id="easterEggBubble" class="easter-egg-bubble"></div>
+<img src="images/boba.png" alt="" class="deco-boba">
+<div id="confettiLayer" class="confetti-layer"></div>
+
+<nav class="app-nav" id="appNav">
+  <button data-goto="screenMenu" title="Kembali ke halaman utama (pembuka)"><img src="images/ic-kejutan.png" alt="">Home</button>
+  <button data-goto="screenPesan" title="Membaca pesan/ucapan spesial untuk dia"><img src="images/ic-pesan.png" alt="">Pesan</button>
+  <button data-goto="screenGaleri" title="Melihat foto-foto kenangan kalian bersama"><img src="images/ic-galeri.png" alt="">Galeri</button>
+  <button data-goto="screenGame" title="Bermain mini game seru untuk dapat hadiah"><img src="images/ic-game.png" alt="">Game</button>
+  <button data-goto="screenMusik" title="Memutar lagu favorit atau musik lucu"><img src="images/ic-musik.png" alt="">Musik</button>
+  <button data-goto="screenKejutan" title="Membuka kejutan spesial di akhir halaman"><img src="images/ic-home.png" alt="">Kejutan lainnya</button>
+</nav>
+
+<!-- ============ SCREEN: WELCOME ============ -->
+<section id="screenWelcome" class="screen active">
+  <div class="welcome-card">
+    <img src="images/balon.png" alt="" class="deco-balon">
+    <img src="images/kado.png" alt="" class="deco-kado">
+    <h1>🌸 Selamat Datang! 🌸</h1>
+    <p>Hari ini ada seseorang yang...</p>
+    <ul class="welcome-list">
+      <li>✨ Bertambah cantik</li>
+      <li>✨ Bertambah keren</li>
+      <li>✨ Bertambah tua sedikit 🤭</li>
+    </ul>
+    <p>Siap menerima hadiah?</p>
+    <div class="welcome-buttons" id="welcomeButtons">
+      <button id="btnYa" class="btn-ya">Ya!! 💖</button>
+      <button id="btnBelum" class="btn-belum">Belum... 😶</button>
+    </div>
+    <p id="belumTaunt" class="belum-taunt"></p>
+  </div>
+</section>
+
+<!-- ============ SCREEN: REVEAL ============ -->
+<section id="screenReveal" class="screen">
+  <div class="reveal-wrap">
+    <p class="reveal-face">(づ｡◕‿‿◕｡)づ</p>
+    <p id="loadingText">Loading hadiah...</p>
+    <div class="loading-stars">⭐⭐⭐⭐⭐</div>
+    <button id="cakeBtn" class="cake-btn" style="display:none;">🎂</button>
+    <div id="revealBurstText" class="reveal-burst-text"></div>
+    <button id="btnLanjutMenu" class="btn-lanjut">Lanjut ke Menu →</button>
+  </div>
+</section>
+
+<!-- ============ SCREEN: MENU UTAMA ============ -->
+<section id="screenMenu" class="screen">
+  <img src="images/bunting.png" alt="" class="bunting-img">
+  <h2 class="app-header">🎀 Birthday Menu 🎀</h2>
+  <div class="menu-grid">
+    <button class="menu-item" data-goto="screenPesan"><span>📖</span>Cerita Hari Ini</button>
+    <button class="menu-item" data-goto="screenGaleri"><span>📷</span>Album Kenangan</button>
+    <button class="menu-item" data-goto="screenGame"><span>🎮</span>Mini Game</button>
+    <button class="menu-item" data-goto="screenKotak"><span>🎁</span>Kotak Misterius</button>
+    <button class="menu-item" data-goto="screenMusik"><span>🎵</span>Musik</button>
+  </div>
+  <p class="app-footer">Made with ❤️ and 🍰 — Only for You</p>
+</section>
+
+<!-- ============ SCREEN: PESAN SPESIAL ============ -->
+<section id="screenPesan" class="screen">
+  <button class="btn-back" data-goto="screenMenu">← Kembali</button>
+  <div class="pesan-card">
+    <p id="pesanText" class="pesan-text"></p>
+    <div class="pesan-nav">
+      <button id="pesanPrev">← Sebelumnya</button>
+      <span id="pesanCounter">1 / 6</span>
+      <button id="pesanNext">Berikutnya →</button>
+    </div>
+    <div class="pesan-dots" id="pesanDots"></div>
+  </div>
+</section>
+
+<!-- ============ SCREEN: GALERI KENANGAN ============ -->
+<section id="screenGaleri" class="screen">
+  <button class="btn-back" data-goto="screenMenu">← Kembali</button>
+  <h2 class="app-header" style="font-size:22px;margin-top:40px;">Kenangan Kitaa 💕</h2>
+  <div class="galeri-line" id="galeriLine"></div>
+  <p class="galeri-hint">Klik foto untuk membaliknya!</p>
+</section>
+
+<!-- ============ SCREEN: MINI GAME ============ -->
+<section id="screenGame" class="screen">
+  <button class="btn-back" data-goto="screenMenu">← Kembali</button>
+  <div class="game-hud" style="margin-top:30px;">
+    <span>⏰ <span id="gameTimer">30</span></span>
+    <h2 style="font-size:22px;">Tangkap Kue!</h2>
+    <span>Skor: <span id="gameScore">0</span></span>
+  </div>
+  <div class="game-substats" style="display:flex;justify-content:center;gap:16px;margin-bottom:10px;font-size:15px;">
+    <span id="gameStars">☆☆☆</span>
+    <span id="gameHearts">❤️❤️❤️</span>
+  </div>
+  <div class="game-area" id="gameArea">
+    <div id="gameOverlayText" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-weight:700;color:var(--text-soft);text-align:center;padding:20px;">Tekan "Mulai!" untuk main</div>
+  </div>
+  <button id="gameStartBtn" class="game-start-btn">Mulai!</button>
+  <div id="gameResult" class="game-result"></div>
+</section>
+
+<!-- ============ SCREEN: KOTAK MISTERIUS ============ -->
+<section id="screenKotak" class="screen">
+  <button class="btn-back" data-goto="screenMenu">← Kembali</button>
+  <h2 class="app-header">Klik Kotaknyaa!</h2>
+  <button id="kotakBtn" class="kotak-btn">📦</button>
+  <p id="kotakText" class="kotak-text"></p>
+  <button id="kotakLanjutBtn" class="btn-lanjut" data-goto="screenKejutan">Lihat Kejutannya →</button>
+</section>
+
+<!-- ============ SCREEN: MUSIK ============ -->
+<section id="screenMusik" class="screen">
+  <button class="btn-back" data-goto="screenMenu">← Kembali</button>
+  <div class="music-player">
+    <div class="music-cover" id="musicCover">🎵</div>
+    <p class="music-title">Sunshine Day</p>
+    <p class="music-artist">Sweetest Mood</p>
+    <div class="music-progress" id="musicProgressBar"><div class="music-progress-fill" id="musicProgressFill"></div></div>
+    <div class="music-time"><span id="musicTimeNow">0:00</span><span id="musicTimeTotal">0:00</span></div>
+    <div class="music-controls">
+      <button id="musicPrev">⏮</button>
+      <button id="musicPlayBtn" class="music-play-btn">▶</button>
+      <button id="musicNext">⏭</button>
+    </div>
+    <div class="music-modes">
+      <button data-mode="playlist">🎧 Playlist Lucu</button>
+      <button data-mode="kucing">🐱 Mode Kucing</button>
+      <button data-mode="party">🎉 Party Mode</button>
+      <button data-mode="relaksasi">🧘 Relaksasi</button>
+    </div>
+  </div>
+  <audio id="bgMusic" loop>
+    <source src="musik.mp3" type="audio/mpeg">
+  </audio>
+</section>
+
+<div id="musicToast" class="music-toast"></div>
+
+<!-- ============ SCREEN: KEJUTAN ============ -->
+<section id="screenKejutan" class="screen">
+  <div class="kejutan-card">
+    <h2 class="kejutan-title">SURPRISEE!! 🎉</h2>
+    <p class="kejutan-sub">Semoga kamu sukaa! 🌸</p>
+    <div class="kejutan-bubble">
+      "Kamu itu hebat! Jangan lupa makan yang banyak yaa biar makin pintar dan cantik, hehe 😊"
+    </div>
+    <p class="kejutan-signoff">I'm so lucky to know you! 💕</p>
+  </div>
+</section>
+
+<!-- ============ MODAL: EXIT INTENT ============ -->
+<div id="exitModal" class="exit-modal">
+  <div class="exit-modal-card">
+    <p style="font-size:30px;">🥺</p>
+    <p style="font-weight:700;">Yakin mau pergi?</p>
+    <p style="color:var(--text-soft);font-size:14px;">Aku masih punya kejutan...</p>
+    <div class="exit-modal-buttons">
+      <button id="exitStayBtn" class="exit-stay">Tetap di sini</button>
+      <button id="exitLeaveBtn" class="exit-leave">Iya</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ============================================================
+   1) CONFETTI / BURST PARTICLES (dipakai ulang di beberapa momen)
+============================================================ */
+const confettiLayer = document.getElementById('confettiLayer');
+const confettiEmojis = ['🌸','🎉','⭐','💖','🎊','✨'];
+
+function spawnConfetti(x, y, jumlah = 40){
+  for(let i=0; i<jumlah; i++){
+    const el = document.createElement('span');
+    el.className = 'confetti-piece';
+    el.textContent = confettiEmojis[Math.floor(Math.random()*confettiEmojis.length)];
+    el.style.fontSize = (14 + Math.random()*16) + 'px';
+
+    const angle = Math.random()*Math.PI*2;
+    const distance = 80 + Math.random()*260;
+    const dx = Math.cos(angle)*distance;
+    const dy = Math.sin(angle)*distance + 120; // bias jatuh ke bawah
+    const rot = (Math.random()*720-360) + 'deg';
+    const durasi = 1.2 + Math.random()*0.8;
+
+    el.style.left = x + 'px';
+    el.style.top = y + 'px';
+    el.style.setProperty('--dx', dx+'px');
+    el.style.setProperty('--dy', dy+'px');
+    el.style.setProperty('--rot', rot);
+    el.style.animationDuration = durasi + 's';
+    el.style.animationDelay = (Math.random()*0.15) + 's';
+
+    confettiLayer.appendChild(el);
+    setTimeout(()=> el.remove(), (durasi+0.2)*1000);
+  }
+}
+function confettiFullScreen(jumlah = 90){
+  spawnConfetti(window.innerWidth/2, window.innerHeight*0.35, jumlah);
+}
+
+/* ============================================================
+   2) CURSOR KUSTOM & JEJAK SPARKLE
+============================================================ */
+const customCursor = document.getElementById('customCursor');
+const sparkleImgs = ['images/sparkle1.png','images/sparkle2.png'];
+let sparkleTick = 0;
+
+if(window.matchMedia('(hover:hover) and (pointer:fine)').matches){
+  document.addEventListener('mousemove', (e) => {
+    customCursor.style.transform = `translate(${e.clientX}px, ${e.clientY}px) translate(-50%,-50%)`;
+
+    sparkleTick++;
+    if(sparkleTick % 4 === 0){
+      const sparkle = document.createElement('img');
+      sparkle.className = 'sparkle';
+      sparkle.src = sparkleImgs[Math.floor(Math.random()*sparkleImgs.length)];
+      sparkle.alt = '';
+      sparkle.style.left = e.clientX + 'px';
+      sparkle.style.top = e.clientY + 'px';
+      document.body.appendChild(sparkle);
+      setTimeout(()=> sparkle.remove(), 900);
+    }
+  });
+}
+
+/* ============================================================
+   3) EASTER EGG — KARAKTER POJOK
+============================================================ */
+const easterEgg = document.getElementById('easterEgg');
+const easterEggBubble = document.getElementById('easterEggBubble');
+let eggClicks = 0;
+
+easterEgg.addEventListener('click', () => {
+  eggClicks++;
+  if(eggClicks % 10 === 0){
+    easterEggBubble.textContent = 'Hei! Aku juga mau kue 😭';
+    easterEggBubble.classList.add('show');
+    setTimeout(()=> easterEggBubble.classList.remove('show'), 2500);
+  }
+});
+
+/* ============================================================
+   4) SCREEN MANAGER
+============================================================ */
+const appNav = document.getElementById('appNav');
+const screensDenganNav = ['screenMenu','screenPesan','screenGaleri','screenGame','screenKotak','screenMusik','screenKejutan'];
+
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+
+  if(screensDenganNav.includes(id)){
+    document.body.classList.add('app-started');
+    appNav.classList.add('show');
+    appNav.querySelectorAll('button').forEach(b => b.classList.toggle('active', b.dataset.goto === id));
+  } else {
+    appNav.classList.remove('show');
+  }
+}
+document.querySelectorAll('[data-goto]').forEach(btn => {
+  btn.addEventListener('click', () => showScreen(btn.dataset.goto));
+});
+
+/* ============================================================
+   5) SCREEN WELCOME: tombol "Ya" & "Belum" yang kabur
+============================================================ */
+const btnYa = document.getElementById('btnYa');
+const btnBelum = document.getElementById('btnBelum');
+const belumTaunt = document.getElementById('belumTaunt');
+const welcomeButtons = document.getElementById('welcomeButtons');
+
+const godaan = ['Ehhh... jangan kabur dulu dong! 😂', 'astaga sini dulu~ 🥹', 'Nggak boleh nolak hadiah! 🎁', 'Coba lagi deh, hehe 😝'];
+
+function kaburkanBelum(){
+  const batas = welcomeButtons.getBoundingClientRect();
+  const maxX = Math.max(batas.width - 120, 20);
+  const maxY = Math.max(batas.height - 50, 10);
+  btnBelum.style.position = 'absolute';
+  btnBelum.style.left = (Math.random()*maxX) + 'px';
+  btnBelum.style.top = (Math.random()*maxY) + 'px';
+  belumTaunt.textContent = godaan[Math.floor(Math.random()*godaan.length)];
+}
+btnBelum.addEventListener('mouseenter', kaburkanBelum);
+btnBelum.addEventListener('touchstart', (e) => { e.preventDefault(); kaburkanBelum(); }, { passive:false });
+
+btnYa.addEventListener('click', () => {
+  showScreen('screenReveal');
+  mulaiReveal();
+});
+
+/* ============================================================
+   6) SCREEN REVEAL: loading -> kue -> pop -> lanjut
+============================================================ */
+const loadingText = document.getElementById('loadingText');
+const cakeBtn = document.getElementById('cakeBtn');
+const revealBurstText = document.getElementById('revealBurstText');
+const btnLanjutMenu = document.getElementById('btnLanjutMenu');
+let revealSudahJalan = false;
+
+function mulaiReveal(){
+  if(revealSudahJalan) return; // supaya tidak restart kalau screen ini dibuka lagi
+  revealSudahJalan = true;
+  setTimeout(() => {
+    loadingText.textContent = 'Hampir siap...';
+  }, 900);
+  setTimeout(() => {
+    loadingText.style.display = 'none';
+    document.querySelector('.loading-stars').style.display = 'none';
+    cakeBtn.style.display = 'inline-block';
+  }, 1800);
+}
+cakeBtn.addEventListener('click', () => {
+  if(cakeBtn.classList.contains('popped')) return;
+  cakeBtn.classList.add('popped');
+  const rect = cakeBtn.getBoundingClientRect();
+  confettiFullScreen(70);
+  spawnConfetti(rect.left + rect.width/2, rect.top + rect.height/2, 40);
+  setTimeout(() => {
+    revealBurstText.textContent = '✨ HAPPY BIRTHDAY!! ✨';
+    revealBurstText.classList.add('show');
+    btnLanjutMenu.classList.add('show');
+  }, 300);
+});
+btnLanjutMenu.addEventListener('click', () => showScreen('screenMenu'));
+
+/* ============================================================
+   7) SCREEN PESAN SPESIAL
+============================================================ */
+const pesanList = [
+  'Haiii! 👋\n\nHari ini ada yang ulang tahun ya? 😊',
+  'Selamat ulang tahun yaa!\nSemoga hari ini jadi hari paling bahagia buat kamu. 🎉',
+  'Terima kasih udah jadi teman yang baik, seru, lucu, dan selalu bikin hari-hari lebih berwarna! 🌈',
+  'Semoga semua impian kamu tercapai satu per satu.\nJangan lupa selalu jadi diri kamu sendiri, karena kamu itu amazing! 💫',
+  'Aku selalu dukung kamu kok, dari sini. 💖\n\nDan jangan lupa makan yang banyak yaa 🤭',
+  'With lots of love,\nSomeone Special ✨'
+];
+let pesanIndex = 0;
+const pesanText = document.getElementById('pesanText');
+const pesanCounter = document.getElementById('pesanCounter');
+const pesanPrev = document.getElementById('pesanPrev');
+const pesanNext = document.getElementById('pesanNext');
+const pesanDots = document.getElementById('pesanDots');
+
+pesanList.forEach((_, i) => {
+  const dot = document.createElement('span');
+  if(i === 0) dot.classList.add('active');
+  pesanDots.appendChild(dot);
+});
+
+function renderPesan(){
+  pesanText.textContent = pesanList[pesanIndex];
+  pesanCounter.textContent = `${pesanIndex+1} / ${pesanList.length}`;
+  pesanPrev.disabled = pesanIndex === 0;
+  pesanNext.textContent = pesanIndex === pesanList.length-1 ? 'Selesai ✓' : 'Berikutnya →';
+  [...pesanDots.children].forEach((d, i) => d.classList.toggle('active', i === pesanIndex));
+}
+pesanPrev.addEventListener('click', () => { if(pesanIndex>0){ pesanIndex--; renderPesan(); } });
+pesanNext.addEventListener('click', () => {
+  if(pesanIndex < pesanList.length-1){ pesanIndex++; renderPesan(); }
+  else { showScreen('screenMenu'); }
+});
+renderPesan();
+
+/* ============================================================
+   8) SCREEN GALERI KENANGAN
+============================================================ */
+const galeriLine = document.getElementById('galeriLine');
+const polaroidFrames = ['images/polaroid-pink.png','images/polaroid-purple.png','images/polaroid-yellow.png'];
+const galeriData = [
+  { caption:'Ganti dengan fotomu ♡', balik:'Kamu inget momen ini? 💕' },
+  { caption:'Ganti dengan fotomu ♡', balik:'Ini salah satu hari favoritku 🌸' },
+  { caption:'Ganti dengan fotomu ♡', balik:'Terima kasih untuk semua ceritanya 🥹' },
+  { caption:'Ganti dengan fotomu ♡', balik:'Semoga masih banyak lagi momen seru ✨' },
+  { caption:'Ganti dengan fotomu ♡', balik:'You mean a lot to me ♡' },
+];
+galeriData.forEach((data, i) => {
+  const frame = polaroidFrames[i % polaroidFrames.length];
+  const card = document.createElement('div');
+  card.className = 'polaroid';
+  card.style.setProperty('--tilt', (Math.random()*10-5) + 'deg');
+  card.innerHTML = `
+    <div class="polaroid-inner">
+      <div class="polaroid-front">
+        <img src="${frame}" alt="">
+        <span class="polaroid-caption">${data.caption}</span>
+      </div>
+      <div class="polaroid-back">${data.balik}</div>
+    </div>`;
+  card.addEventListener('click', () => card.classList.toggle('flipped'));
+  galeriLine.appendChild(card);
+});
+
+/* ============================================================
+   9) SCREEN MINI GAME: Tangkap Kue
+============================================================ */
+const gameArea = document.getElementById('gameArea');
+const gameOverlayText = document.getElementById('gameOverlayText');
+const gameTimerEl = document.getElementById('gameTimer');
+const gameScoreEl = document.getElementById('gameScore');
+const gameStarsEl = document.getElementById('gameStars');
+const gameHeartsEl = document.getElementById('gameHearts');
+const gameStartBtn = document.getElementById('gameStartBtn');
+const gameResult = document.getElementById('gameResult');
+const treatEmojis = ['🍰','🧁','🍪','🍩','🍫'];
+let gameInterval = null, spawnInterval = null, gameTimeLeft = 30, gameScore = 0, gameHearts = 3, gameActive = false;
+
+function updateGameStars(){
+  const totalBintang = gameScore >= 20 ? 3 : gameScore >= 12 ? 2 : gameScore >= 6 ? 1 : 0;
+  gameStarsEl.textContent = '⭐'.repeat(totalBintang) + '☆'.repeat(3 - totalBintang);
+}
+function updateGameHearts(){
+  gameHeartsEl.textContent = '❤️'.repeat(gameHearts) + '🤍'.repeat(3 - gameHearts);
+}
+
+function spawnTreat(){
+  if(!gameActive) return;
+  const treat = document.createElement('button');
+  treat.className = 'treat';
+  treat.textContent = treatEmojis[Math.floor(Math.random()*treatEmojis.length)];
+  const areaW = gameArea.clientWidth - 40;
+  const areaH = gameArea.clientHeight - 40;
+  treat.style.left = (Math.random()*areaW) + 'px';
+  treat.style.top = (Math.random()*areaH) + 'px';
+  let tertangkap = false;
+  treat.addEventListener('click', () => {
+    tertangkap = true;
+    gameScore++;
+    gameScoreEl.textContent = gameScore;
+    updateGameStars();
+    treat.remove();
+  });
+  gameArea.appendChild(treat);
+  // Kalau tidak diklik sampai waktu habis, hilang sendiri & kurangi 1 nyawa
+  setTimeout(() => {
+    if(treat.isConnected){
+      treat.remove();
+      if(gameActive && !tertangkap){
+        gameHearts = Math.max(0, gameHearts - 1);
+        updateGameHearts();
+        if(gameHearts <= 0) selesaiGame();
+      }
+    }
+  }, 1400);
+}
+
+function mulaiGame(){
+  gameArea.innerHTML = '';
+  gameScore = 0; gameTimeLeft = 30; gameHearts = 3; gameActive = true;
+  gameScoreEl.textContent = 0; gameTimerEl.textContent = 30;
+  updateGameStars(); updateGameHearts();
+  gameResult.textContent = ''; gameStartBtn.textContent = 'Sedang bermain...'; gameStartBtn.disabled = true;
+
+  spawnInterval = setInterval(spawnTreat, 550);
+  gameInterval = setInterval(() => {
+    gameTimeLeft--;
+    gameTimerEl.textContent = gameTimeLeft;
+    if(gameTimeLeft <= 0) selesaiGame();
+  }, 1000);
+}
+function selesaiGame(){
+  gameActive = false;
+  clearInterval(gameInterval);
+  clearInterval(spawnInterval);
+  gameArea.querySelectorAll('.treat').forEach(t => t.remove());
+  gameStartBtn.textContent = 'Main Lagi!'; gameStartBtn.disabled = false;
+
+  if(gameScore >= 20){
+    gameResult.textContent = 'Hebat!! Hadiah berhasil dibuka! 🎁';
+    confettiFullScreen(60);
+  } else if(gameHearts <= 0){
+    gameResult.textContent = `Nyawa habis! Skor kamu ${gameScore}. Yuk coba lagi!`;
+  } else {
+    gameResult.textContent = `Skor kamu ${gameScore}. Yuk coba lagi!`;
+  }
+}
+gameStartBtn.addEventListener('click', mulaiGame);
+
+/* ============================================================
+   10) SCREEN KOTAK MISTERIUS
+============================================================ */
+const kotakBtn = document.getElementById('kotakBtn');
+const kotakText = document.getElementById('kotakText');
+const kotakLanjutBtn = document.getElementById('kotakLanjutBtn');
+let kotakKlik = 0;
+
+kotakBtn.addEventListener('click', () => {
+  if(kotakBtn.classList.contains('opened')) return;
+  kotakKlik++;
+  kotakBtn.classList.remove('shake');
+  void kotakBtn.offsetWidth;
+
+  if(kotakKlik === 1){
+    kotakText.textContent = '....';
+  } else if(kotakKlik === 2){
+    kotakBtn.classList.add('shake');
+    kotakText.textContent = 'Masih belum 😝';
+  } else if(kotakKlik >= 3){
+    kotakBtn.classList.add('opened');
+    kotakText.textContent = '🌸🌸🌸🌸🌸\n\nRahasia: kamu adalah salah satu alasan aku percaya hari-hari baik itu selalu ada. Selamat ulang tahun! 💕';
+    kotakText.style.whiteSpace = 'pre-line';
+    confettiFullScreen(80);
+    kotakLanjutBtn.classList.add('show');
+  }
+});
+
+/* ============================================================
+   11) SCREEN MUSIK
+============================================================ */
+const bgMusic = document.getElementById('bgMusic');
+const musicPlayBtn = document.getElementById('musicPlayBtn');
+const musicCover = document.getElementById('musicCover');
+const musicProgressBar = document.getElementById('musicProgressBar');
+const musicProgressFill = document.getElementById('musicProgressFill');
+const musicTimeNow = document.getElementById('musicTimeNow');
+const musicTimeTotal = document.getElementById('musicTimeTotal');
+const musicToast = document.getElementById('musicToast');
+
+function formatWaktu(detik){
+  if(!isFinite(detik)) return '0:00';
+  const menit = Math.floor(detik/60);
+  const sisa = Math.floor(detik%60).toString().padStart(2,'0');
+  return `${menit}:${sisa}`;
+}
+musicPlayBtn.addEventListener('click', () => {
+  if(bgMusic.paused){
+    bgMusic.play().catch(()=>{});
+    musicPlayBtn.textContent = '⏸';
+    musicCover.classList.add('playing');
+  } else {
+    bgMusic.pause();
+    musicPlayBtn.textContent = '▶';
+    musicCover.classList.remove('playing');
+  }
+});
+bgMusic.addEventListener('timeupdate', () => {
+  musicProgressFill.style.width = (bgMusic.currentTime/bgMusic.duration*100 || 0) + '%';
+  musicTimeNow.textContent = formatWaktu(bgMusic.currentTime);
+});
+bgMusic.addEventListener('loadedmetadata', () => {
+  musicTimeTotal.textContent = formatWaktu(bgMusic.duration);
+});
+musicProgressBar.addEventListener('click', (e) => {
+  const lebar = musicProgressBar.clientWidth;
+  if(bgMusic.duration) bgMusic.currentTime = (e.offsetX/lebar) * bgMusic.duration;
+});
+
+let toastTimeout;
+function tampilkanToast(pesan){
+  musicToast.textContent = pesan;
+  musicToast.classList.add('show');
+  clearTimeout(toastTimeout);
+  toastTimeout = setTimeout(()=> musicToast.classList.remove('show'), 2200);
+}
+document.querySelectorAll('.music-modes button').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const mode = btn.dataset.mode;
+    if(mode === 'kucing') tampilkanToast('Meow~ Happy Birthday~ 🐱');
+    else if(mode === 'party'){ tampilkanToast('🎉 Party Mode aktif!'); confettiFullScreen(50); }
+    else if(mode === 'relaksasi') tampilkanToast('😌 Santai dulu yuk~');
+    else tampilkanToast('🎧 Memutar Playlist Lucu~');
+  });
+});
+
+/* ============================================================
+   12) MODAL EXIT-INTENT
+   Catatan: browser modern TIDAK mengizinkan teks custom pada
+   dialog konfirmasi keluar bawaan (beforeunload) — jadi ini
+   memakai deteksi "exit-intent" (mouse bergerak cepat ke arah
+   atas layar, tanda mau menutup tab/pindah alamat) sebagai
+   gantinya. Ini hanya berfungsi di desktop (ada mouse).
+============================================================ */
+const exitModal = document.getElementById('exitModal');
+const exitStayBtn = document.getElementById('exitStayBtn');
+const exitLeaveBtn = document.getElementById('exitLeaveBtn');
+let exitSudahMuncul = false;
+let exitIntentSiap = false;
+setTimeout(() => { exitIntentSiap = true; }, 4000); // baru aktif setelah 4 detik, hindari salah picu saat load
+
+document.addEventListener('mouseout', (e) => {
+  // relatedTarget null = mouse benar-benar keluar dari jendela browser (bukan cuma pindah antar elemen)
+  if(exitIntentSiap && e.clientY <= 0 && e.relatedTarget === null && !exitSudahMuncul){
+    exitSudahMuncul = true;
+    exitModal.classList.add('show');
+  }
+});
+exitStayBtn.addEventListener('click', () => {
+  exitModal.classList.remove('show');
+  confettiFullScreen(60);
+  setTimeout(()=> exitSudahMuncul = false, 4000); // boleh muncul lagi setelah beberapa saat
+});
+exitLeaveBtn.addEventListener('click', () => {
+  exitModal.classList.remove('show');
+});
+</script>
+</body>
+</html>
