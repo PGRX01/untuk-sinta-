@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Content-Security-Policy" content="...">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<meta name="robots" content="noindex, nofollow">
+<script>
+  if (window.top !== window.self) { window.top.location = window.self.location; }
+</script>
+<title>For My Love 💗</title>
+
+<!-- ======================================================
+     FONT: Mengambil 2 jenis font dari Google Fonts
+     - 'Playfair Display' & 'Great Vibes' untuk judul (kesan romantis, tulisan tangan)
+     - 'Poppins' untuk teks biasa (mudah dibaca)
+====================================================== -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Playfair+Display:ital,wght@0,600;0,700;1,600&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- ======================================================
+     LOADING SCREEN / INTRO
+     Layar pembuka bertema bunga bercahaya (neon). Daftar bunga & posisinya diisi otomatis
+     lewat JavaScript (lihat bagian file javascript).
+     Tombol titik biru di tengah = trigger untuk masuk website
+     sekaligus trigger pertama kali musik latar diputar.
+====================================================== -->
+<div id="loadingScreen">
+  <div class="flower-field" id="flowerField"></div>
+ <div class="login-card" id="loginCard">
+  <div class="login-icon">💗</div>
+  <h2 class="login-title">Khusus untuk sinta</h2>
+  <p class="login-sub">Isi dulu identitasmu ya, biar kejutan kecil ini cuma kebuka buat kamu 🎀</p>
+
+  <div class="login-field">
+    <label for="loginName">your name</label>
+    <input type="text" id="loginName" placeholder="type your name here..." autocomplete="off">
+  </div>
+
+  <div class="login-field login-field-date">
+    <label>your birthday</label>
+    <div class="date-selects">
+      <select id="loginDay"><option value="">date</option></select>
+      <select id="loginMonth"><option value="">moon</option></select>
+    </div>
+  </div>
+
+  <button class="login-submit" id="loginSubmit">
+    Buka Kejutannya <span class="heart-icon">💝</span>
+  </button>
+
+  <p class="login-error" id="loginError">Hmm,kamu beneran sinta kan??😄😄</p>
+</div>
+</div>
+
+<!-- ======================================================
+     SELURUH KONTEN WEBSITE UTAMA
+     Dibungkus dalam #siteContent supaya bisa di-fade-in
+     bersamaan begitu loading screen ditutup.
+====================================================== -->
+<div id="siteContent">
+
+<!-- ======================================================
+     ELEMEN DEKORASI: hati & kelopak melayang di background
+     (dibuat lewat JS supaya jumlah & posisinya acak/dinamis)
+====================================================== -->
+<div class="floaters" id="floaters"></div>
+
+<!-- ======================================================
+     AUDIO BACKSOUND
+     Ganti "musik.mp3" dengan lagu pilihanmu (upload file audio
+     ke folder yang sama dengan file HTML ini).
+     loop -> lagu diulang terus, preload -> disiapkan dari awal.
+====================================================== -->
+<audio id="bgMusic" loop preload="auto">
+  <source src="musik.mp3" type="audio/mpeg">
+</audio>
+
+
+<!-- ======================================================
+     NAVBAR
+====================================================== -->
+<header>
+  <div class="logo">🤍 For My Love</div>
+  <nav>
+    <ul>
+      <li><a href="#beranda" class="active">Beranda</a></li>
+      <li><a href="#pesan">💌</a></li>
+      <li><a href="#galeri">Galeri Kenangan</a></li>
+      <li><a href="D:\projek gabut\projek 30 mar\suprise.html" target="_blank" rel="noopener noreferrer">Surprise 🎁</a></li>
+    </ul>
+  </nav>
+  <button class="btn-cta">🤍 Untuk Kamu</button>
+</header>
+
+<!-- ======================================================
+     HERO SECTION
+====================================================== -->
+<section class="hero" id="beranda">
+  <div class="hero-text">
+    <h1>Happy Birthday<br>Sayang <span class="heart">♡</span></h1>
+    <p>Terima kasih sudah hadir dalam hidupku dan membuat setiap hariku penuh dengan ceritaa.</p>
+    <!-- Tombol ini akan men-scroll halaman ke bagian "Pesan Untukmu" -->
+    <button class="btn-main" onclick="document.getElementById('pesan').scrollIntoView({behavior:'smooth'})">
+      🤍 Pesan untuk adekk sinn sayang
+    </button>
+  </div>
+
+  <div class="bouquet-wrap">
+    <div class="polaroid">
+      <div class="bouquet">
+        <div class="rose r1"></div>
+        <div class="rose r2"></div>
+        <div class="rose r3"></div>
+        <div class="rose r4"></div>
+        <div class="rose r5"></div>
+      </div>
+      <div class="note-card">You mean the world to me ♡</div>
+    </div>
+    <div class="sticky-note">
+      <h4>Untuk kamu</h4>
+      <ul>
+        <li>♥ Wanita paling hebat</li>
+        <li>♥ Cantik luar dalam</li>
+        <li>♥ selalu Pengertian</li>
+        <li>♥ calon istriku </li>
+        <li>♥ cintaku</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ======================================================
+     COUNTDOWN + PESAN UNTUKMU
+====================================================== -->
+<section class="split-section" id="pesan">
+  <div class="card countdown-card">
+    <h3>Menuju Hari Spesialmu ✨</h3>
+    <div class="timer">
+      <div class="box"><b id="cd-days">00</b><span>Hari</span></div>
+      <div class="box"><b id="cd-hours">00</b><span>Jam</span></div>
+      <div class="box"><b id="cd-mins">00</b><span>Menit</span></div>
+      <div class="box"><b id="cd-secs">00</b><span>Detik</span></div>
+    </div>
+    <div class="caption">Sampai hari bahagiamu 🎂</div>
+  </div>
+
+  <div class="card message-card">
+    <h3>Untuk adeku sayangg💌</h3>
+    <p >
+      Selamat ulang tahunnn bbyy, sayangkuuu! Semoga di hari spesialmu ini, semua kebahagiaan,
+      kesehatan, dan cintakuu selalu menyertaimu.<br>
+      Teruslah jadi dirimu yang selalu aku banggakan.<br>
+      Aku sayang kamu hari ini, besok, dan selamanyaaaa. 💕
+    </p>
+    <div class="signature">– <u>SuYa</u> 😘</div>
+  </div>
+</section>
+
+<!-- ======================================================
+     GALERI KENANGAN
+     Setiap kotak adalah "slot foto" — ganti background-image
+     di CSS (.p1, .p2, dst) dengan url('foto-kamu.jpg') untuk
+     menampilkan foto asli kalian.
+====================================================== -->
+<section class="gallery-section" id="galeri">
+  <h2>Galeri Kenangan Kita 📸</h2>
+  <p class="sub">Setiap momen bersamamu adalah kenangan terindah.</p>
+  <div class="gallery-grid" id="kenangan">
+    <div class="photo-slot p1"></div>
+  <div class="photo-slot p2 video-slot">
+  <video src="gambar\video 2.mp4" poster="gambar\foto 2.png" autoplay muted loop playsinline></video>
+</div>
+    <div class="photo-slot p3"></div>
+    <div class="photo-slot p4">
+       <video src="gambar\video 4.mp4" poster="gambar\foto 4.png" autoplay muted loop playsinline></video>
+    </div>
+    <div class="photo-slot p5">Ganti dengan<br>fotomu ♡</div>
+    <div class="photo-slot p6">Ganti dengan<br>fotomu ♡</div>
+  </div>
+</section>
+
+<!-- ======================================================
+     FOOTER QUOTE
+====================================================== -->
+<footer>
+  ♡ "Bersamamu adalah tempat ternyaman yang pernah aku tahu." ♡
+</footer>
+
+<!-- ======================================================
+     TOMBOL TOGGLE MUSIK (BACKSOUND)
+====================================================== -->
+<button id="musicToggle" title="Putar / Jeda Musik"><i>♪</i></button>
+
+</div><!-- /#siteContent -->
+
+<script src="script.js"></script>
+</body>
+</html>
